@@ -62,6 +62,7 @@ members = [
     "crates/net/network-api/",
     "crates/net/network-types/",
     "crates/net/network/",
+    "crates/net/onion/",
     "crates/net/p2p/",
     "crates/net/peers/",
     "crates/node/api/",
@@ -361,6 +362,7 @@ reth-dns-discovery = { path = "crates/net/dns" }
 reth-downloaders = { path = "crates/net/downloaders" }
 reth-e2e-test-utils = { path = "crates/e2e-test-utils" }
 reth-ecies = { path = "crates/net/ecies" }
+reth-onion = { path = "crates/net/onion" }
 reth-engine-local = { path = "crates/engine/local" }
 reth-engine-primitives = { path = "crates/engine/primitives", default-features = false }
 reth-engine-tree = { path = "crates/engine/tree" }

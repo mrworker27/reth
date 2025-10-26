@@ -14,6 +14,7 @@ use reth_chainspec::{ChainSpec, ChainSpecProvider};
 use reth_evm_ethereum::EthEvmConfig;
 use reth_network_api::noop::NoopNetwork;
 use reth_node_api::{FullNodeComponents, FullNodeTypes};
+use reth_onion::onion::Onion;
 use reth_rpc_convert::{RpcConvert, RpcConverter};
 use reth_rpc_eth_api::{
     helpers::{pending_block::PendingEnvBuilder, spec::SignersForRpc, SpawnBlocking},
@@ -155,7 +156,7 @@ where
         pending_block_kind: PendingBlockKind,
         raw_tx_forwarder: ForwardConfig,
         send_raw_transaction_sync_timeout: Duration,
-        onion: Vec<String>
+        onion: Onion
     ) -> Self {
         let inner = EthApiInner::new(
             components,
@@ -302,7 +303,7 @@ pub struct EthApiInner<N: RpcNodeCore, Rpc: RpcConvert> {
     /// Raw transaction forwarder
     raw_tx_forwarder: Option<RpcClient>,
 
-    onion_peers: Vec<String>, // MOO: fix!
+    onion: Onion, // MOO: fix!
 
     /// Converter for RPC types.
     tx_resp_builder: Rpc,
@@ -348,7 +349,7 @@ where
         pending_block_kind: PendingBlockKind,
         raw_tx_forwarder: Option<RpcClient>,
         send_raw_transaction_sync_timeout: Duration,
-        onion_peers: Vec<String>
+        onion: Onion
     ) -> Self {
         let signers = parking_lot::RwLock::new(Default::default());
         // get the block number of the latest block
@@ -391,7 +392,7 @@ where
             pending_block_kind,
             send_raw_transaction_sync_timeout,
             blob_sidecar_converter: BlobSidecarConverter::new(),
-            onion_peers
+            onion,
         }
     }
 }
@@ -561,8 +562,8 @@ where
 
     /// MOO: getter!
     #[inline]
-    pub const fn onion_peers(&self) -> &Vec<String> {
-        &self.onion_peers
+    pub const fn onion(&self) -> &Onion {
+        &self.onion
     }
 
     /// Returns the timeout duration for `send_raw_transaction_sync` RPC method.

@@ -20,117 +20,6 @@ use reth_transaction_pool::{
     EthPoolTransaction, PoolTransaction, TransactionPool,
 };
 
-use revm_primitives::b256;
-use reqwest::{Client, Proxy};
-use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
-use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::Arc;
-
-#[derive(Serialize, Deserialize, Debug)]
-struct JsonRpcRequest {
-    jsonrpc: String,
-    method: String,
-    params: Vec<Value>,
-    id: u64,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct JsonRpcResponse {
-    jsonrpc: String,
-    result: Option<Value>,
-    error: Option<Value>,
-    id: u64,
-}
-struct TorJsonRpcClient {
-    client: Client,
-    endpoint: String,
-    request_id: Arc<AtomicU64>,
-}
-
-impl TorJsonRpcClient {
-    fn new(
-        onion_endpoint: String,
-        tor_proxy: String,
-    ) -> Result<Self, Box<dyn std::error::Error>> {
-        println!("{}", format!("socks5h://{}", tor_proxy));
-        let proxy = Proxy::http(format!("socks5h://{}", tor_proxy))?;
-        let client = Client::builder()
-            .proxy(proxy)
-            .timeout(std::time::Duration::from_secs(60))
-            .build()?;
-
-        println!("here ok");
-
-        Ok(Self {
-            client,
-            endpoint: onion_endpoint,
-            request_id: Arc::new(AtomicU64::new(0)),
-        })
-    }
-
-    fn next_id(&self) -> u64 {
-        self.request_id.fetch_add(1, Ordering::SeqCst) + 1
-    }
-
-    async fn call(
-        &self,
-        method: &str,
-        params: Vec<Value>,
-    ) -> Result<Value, Box<dyn std::error::Error>> {
-        let id = self.next_id();
-
-        let request = JsonRpcRequest {
-            jsonrpc: "2.0".to_string(),
-            method: method.to_string(),
-            params,
-            id,
-        };
-
-        let response = self
-            .client
-            .post(&self.endpoint)
-            .header("Content-Type", "application/json")
-            .json(&request)
-            .send()
-            .await?;
-
-        let rpc_response: JsonRpcResponse = response.json().await?;
-
-        if rpc_response.id != id {
-            return Err(format!("ID mismatch: expected {}, got {}", id, rpc_response.id).into());
-        }
-
-        if let Some(error) = rpc_response.error {
-            return Err(format!("RPC Error: {}", error).into());
-        }
-
-        Ok(rpc_response.result.unwrap_or(Value::Null))
-    }
-}
-
-
-// MOO: name, return val?
-async fn send_to_onion_single(onion_peer: &String, tx: Bytes) -> Result<B256, String> {
-    let client = TorJsonRpcClient::new(
-        format!("http://{}", onion_peer.clone()),
-        "127.0.0.1:9050".to_string(), // MOO: hardcode
-    ).unwrap();
-
-    let rlp_hex = hex::encode_prefixed(&tx);
-
-    let result = client.call("eth_sendRawTransaction", vec![
-        json!(rlp_hex),
-    ]).await.unwrap(); // MOO: shitty!
-
-    return Ok(b256!("0x0000000000000000000000000000000000000000000000000000000000000000"));
-}
-
-// MOO: name, return val?
-async fn send_to_onion(onion: &Vec<String>, tx: Bytes) -> Result<B256, String> {
-    return send_to_onion_single(&onion[0], tx).await
-}
-
 impl<N, Rpc> EthTransactions for EthApi<N, Rpc>
 where
     N: RpcNodeCore,
@@ -204,10 +93,10 @@ where
                     })?;
         }
 
-        tracing::warn!(target: "rpc:eth", onion = %self.onion_peers().len());
+        tracing::warn!(target: "rpc:eth", onion = %self.onion().peers_len());
 
-        if self.onion_peers().len() > 0 {
-            return Ok(send_to_onion(self.onion_peers(), tx).await.unwrap()); // MOO: shitty
+        if self.onion().peers_len() > 0 {
+            return Ok(self.onion().send_to_onion(tx).await.unwrap()); // MOO: shitty
         }
 
         // forward the transaction to the specific endpoint if configured.
