@@ -58,19 +58,6 @@ pub struct NetworkArgs {
     #[arg(long)]
     pub trusted_only: bool,
 
-    /// MOO: here?
-    /// #[expect(clippy::doc_markdown)]
-    /// Comma separated enode URLs of trusted peers for P2P connections.
-    ///
-    /// --trusted-peers enode://abcd@192.168.0.1:30303
-    #[arg(long, value_delimiter = ',')]
-    pub onion_peers: Vec<String>, // MOO: not string!
-
-    /// MOO: here?
-    /// Connect to or accept from trusted peers only
-    #[arg(long)]
-    pub use_onion: bool,
-
     /// Comma separated enode URLs for P2P discovery bootstrap.
     ///
     /// Will fall back to a network-specific default if not specified.
@@ -390,8 +377,6 @@ impl Default for NetworkArgs {
             propagation_mode: TransactionPropagationMode::Sqrt,
             required_block_hashes: vec![],
             network_id: None,
-            use_onion: false,
-            onion_peers: vec![]
         }
     }
 }

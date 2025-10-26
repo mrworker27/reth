@@ -44,6 +44,7 @@ pub struct EthApiBuilder<N: RpcNodeCore, Rpc, NextEnv = ()> {
     pending_block_kind: PendingBlockKind,
     raw_tx_forwarder: ForwardConfig,
     send_raw_transaction_sync_timeout: Duration,
+    onion: Vec<String>
 }
 
 impl<Provider, Pool, Network, EvmConfig, ChainSpec>
@@ -94,6 +95,7 @@ impl<N: RpcNodeCore, Rpc, NextEnv> EthApiBuilder<N, Rpc, NextEnv> {
             pending_block_kind,
             raw_tx_forwarder,
             send_raw_transaction_sync_timeout,
+            onion,
         } = self;
         EthApiBuilder {
             components,
@@ -114,6 +116,7 @@ impl<N: RpcNodeCore, Rpc, NextEnv> EthApiBuilder<N, Rpc, NextEnv> {
             pending_block_kind,
             raw_tx_forwarder,
             send_raw_transaction_sync_timeout,
+            onion
         }
     }
 }
@@ -145,6 +148,7 @@ where
             pending_block_kind: PendingBlockKind::Full,
             raw_tx_forwarder: ForwardConfig::default(),
             send_raw_transaction_sync_timeout: Duration::from_secs(30),
+            onion: vec![]
         }
     }
 }
@@ -183,6 +187,7 @@ where
             pending_block_kind,
             raw_tx_forwarder,
             send_raw_transaction_sync_timeout,
+            onion
         } = self;
         EthApiBuilder {
             components,
@@ -203,6 +208,7 @@ where
             pending_block_kind,
             raw_tx_forwarder,
             send_raw_transaction_sync_timeout,
+            onion,
         }
     }
 
@@ -230,6 +236,7 @@ where
             pending_block_kind,
             raw_tx_forwarder,
             send_raw_transaction_sync_timeout,
+            onion,
         } = self;
         EthApiBuilder {
             components,
@@ -250,6 +257,7 @@ where
             pending_block_kind,
             raw_tx_forwarder,
             send_raw_transaction_sync_timeout,
+            onion,
         }
     }
 
@@ -336,6 +344,12 @@ where
     /// Sets the raw transaction forwarder.
     pub fn raw_tx_forwarder(mut self, tx_forwarder: ForwardConfig) -> Self {
         self.raw_tx_forwarder = tx_forwarder;
+        self
+    }
+
+    /// MOO: fix?
+    pub fn onion(mut self, onion: Vec<String>) -> Self {
+        self.onion = onion;
         self
     }
 
@@ -477,6 +491,7 @@ where
             pending_block_kind,
             raw_tx_forwarder,
             send_raw_transaction_sync_timeout,
+            onion
         } = self;
 
         let provider = components.provider().clone();
@@ -517,6 +532,7 @@ where
             pending_block_kind,
             raw_tx_forwarder.forwarder_client(),
             send_raw_transaction_sync_timeout,
+            onion
         )
     }
 
