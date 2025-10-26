@@ -93,6 +93,8 @@ where
                     })?;
         }
 
+        tracing::warn!("MOO27! here is my tx!");
+
         // forward the transaction to the specific endpoint if configured.
         if let Some(client) = self.raw_tx_forwarder() {
             tracing::debug!(target: "rpc::eth", hash = %pool_transaction.hash(), "forwarding raw transaction to forwarder");
