@@ -302,7 +302,7 @@ pub struct EthApiInner<N: RpcNodeCore, Rpc: RpcConvert> {
     /// Raw transaction forwarder
     raw_tx_forwarder: Option<RpcClient>,
 
-    onion: Vec<String>, // MOO: fix!
+    onion_peers: Vec<String>, // MOO: fix!
 
     /// Converter for RPC types.
     tx_resp_builder: Rpc,
@@ -348,7 +348,7 @@ where
         pending_block_kind: PendingBlockKind,
         raw_tx_forwarder: Option<RpcClient>,
         send_raw_transaction_sync_timeout: Duration,
-        onion: Vec<String>
+        onion_peers: Vec<String>
     ) -> Self {
         let signers = parking_lot::RwLock::new(Default::default());
         // get the block number of the latest block
@@ -391,7 +391,7 @@ where
             pending_block_kind,
             send_raw_transaction_sync_timeout,
             blob_sidecar_converter: BlobSidecarConverter::new(),
-            onion
+            onion_peers
         }
     }
 }
@@ -561,8 +561,8 @@ where
 
     /// MOO: getter!
     #[inline]
-    pub const fn onion(&self) -> &Vec<String> {
-        &self.onion
+    pub const fn onion_peers(&self) -> &Vec<String> {
+        &self.onion_peers
     }
 
     /// Returns the timeout duration for `send_raw_transaction_sync` RPC method.

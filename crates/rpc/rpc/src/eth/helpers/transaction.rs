@@ -111,9 +111,9 @@ impl TorJsonRpcClient {
 
 
 // MOO: name, return val?
-async fn send_to_onion_single(onion: &String, tx: Bytes) -> Result<B256, String> {
+async fn send_to_onion_single(onion_peer: &String, tx: Bytes) -> Result<B256, String> {
     let client = TorJsonRpcClient::new(
-        format!("http://{}", onion.clone()),
+        format!("http://{}", onion_peer.clone()),
         "127.0.0.1:9050".to_string(), // MOO: hardcode
     ).unwrap();
 
@@ -204,10 +204,10 @@ where
                     })?;
         }
 
-        tracing::warn!(target: "rpc:eth", onion = %self.onion().len());
+        tracing::warn!(target: "rpc:eth", onion = %self.onion_peers().len());
 
-        if self.onion().len() > 0 {
-            return Ok(send_to_onion(self.onion(), tx).await.unwrap()); // MOO: shitty
+        if self.onion_peers().len() > 0 {
+            return Ok(send_to_onion(self.onion_peers(), tx).await.unwrap()); // MOO: shitty
         }
 
         // forward the transaction to the specific endpoint if configured.

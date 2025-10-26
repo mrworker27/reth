@@ -259,13 +259,13 @@ pub struct RpcServerArgs {
     /// Comma separated enode URLs of trusted peers for P2P connections.
     ///
     /// --trusted-peers enode://abcd@192.168.0.1:30303
-    #[arg(long, value_delimiter = ',')]
+    #[arg(long = "onion.peers", value_delimiter = ',')]
     pub onion_peers: Vec<String>, // MOO: not string!
 
     /// MOO: here?
     /// Connect to or accept from trusted peers only
     #[arg(long)]
-    pub use_onion: bool,
+    pub onion: bool,
 }
 
 impl RpcServerArgs {
@@ -433,7 +433,7 @@ impl Default for RpcServerArgs {
             builder_disallow: Default::default(),
             rpc_send_raw_transaction_sync_timeout:
                 constants::RPC_DEFAULT_SEND_RAW_TX_SYNC_TIMEOUT_SECS,
-            use_onion: false,
+            onion: false,
             onion_peers: vec![]
         }
     }
