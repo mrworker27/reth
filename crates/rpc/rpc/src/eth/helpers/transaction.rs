@@ -14,6 +14,7 @@ use reth_rpc_eth_api::{
     FromEvmError, RpcNodeCore,
 };
 use reth_rpc_eth_types::{error::RpcPoolError, utils::recover_raw_transaction, EthApiError};
+use reth_rpc_server_types::result::rpc_err;
 use reth_storage_api::BlockReaderIdExt;
 use reth_transaction_pool::{
     error::Eip4844PoolTransactionError, AddedTransactionOutcome, EthBlobTransactionSidecar,
@@ -93,10 +94,11 @@ where
                     })?;
         }
 
-        tracing::warn!(target: "rpc:eth", onion = %self.onion().peers_len());
-
-        if self.onion().peers_len() > 0 {
-            return Ok(self.onion().send_to_onion(tx).await.unwrap()); // MOO: shitty
+        if let Some(onion) = self.onion() {
+            return onion
+                .submit_tx(&tx, 2)
+                .await
+                .map_err(|err| EthApiError::other(rpc_err(228, err, None))); // MOO: 228
         }
 
         // forward the transaction to the specific endpoint if configured.

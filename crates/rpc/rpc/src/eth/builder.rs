@@ -4,7 +4,7 @@ use crate::{eth::core::EthApiInner, EthApi};
 use alloy_network::Ethereum;
 use reth_chain_state::CanonStateSubscriptions;
 use reth_chainspec::ChainSpecProvider;
-use reth_onion::onion::Onion;
+use reth_onion::onion::{Onion, OnionConfig};
 use reth_primitives_traits::HeaderTy;
 use reth_rpc_convert::{RpcConvert, RpcConverter};
 use reth_rpc_eth_api::{
@@ -45,7 +45,7 @@ pub struct EthApiBuilder<N: RpcNodeCore, Rpc, NextEnv = ()> {
     pending_block_kind: PendingBlockKind,
     raw_tx_forwarder: ForwardConfig,
     send_raw_transaction_sync_timeout: Duration,
-    onion_peers: Vec<String>
+    onion_peers: Vec<String>,
 }
 
 impl<Provider, Pool, Network, EvmConfig, ChainSpec>
@@ -117,7 +117,7 @@ impl<N: RpcNodeCore, Rpc, NextEnv> EthApiBuilder<N, Rpc, NextEnv> {
             pending_block_kind,
             raw_tx_forwarder,
             send_raw_transaction_sync_timeout,
-            onion_peers
+            onion_peers,
         }
     }
 }
@@ -149,7 +149,7 @@ where
             pending_block_kind: PendingBlockKind::Full,
             raw_tx_forwarder: ForwardConfig::default(),
             send_raw_transaction_sync_timeout: Duration::from_secs(30),
-            onion_peers: vec![]
+            onion_peers: vec![],
         }
     }
 }
@@ -188,7 +188,7 @@ where
             pending_block_kind,
             raw_tx_forwarder,
             send_raw_transaction_sync_timeout,
-            onion_peers
+            onion_peers,
         } = self;
         EthApiBuilder {
             components,
@@ -514,7 +514,7 @@ where
             }),
         );
 
-        let onion = Onion{peers: onion_peers};
+        let onion = Onion::try_new(OnionConfig::default().with_peers(onion_peers)).ok();
 
         EthApiInner::new(
             components,
