@@ -95,6 +95,9 @@ pub struct EthConfig {
     pub raw_tx_forwarder: ForwardConfig,
     /// Timeout duration for `send_raw_transaction_sync` RPC method.
     pub send_raw_transaction_sync_timeout: Duration,
+
+    /// MOO!
+    pub onion_peers: Vec<String>
 }
 
 impl EthConfig {
@@ -126,6 +129,7 @@ impl Default for EthConfig {
             pending_block_kind: PendingBlockKind::Full,
             raw_tx_forwarder: ForwardConfig::default(),
             send_raw_transaction_sync_timeout: RPC_DEFAULT_SEND_RAW_TX_SYNC_TIMEOUT_SECS,
+            onion_peers: vec![]
         }
     }
 }
@@ -208,6 +212,12 @@ impl EthConfig {
         if let Some(tx_forwarder) = tx_forwarder {
             self.raw_tx_forwarder.tx_forwarder = Some(tx_forwarder);
         }
+        self
+    }
+
+    /// MOO!
+    pub fn onion(mut self, onion: Vec<String>) -> Self {
+        self.onion_peers = onion;
         self
     }
 

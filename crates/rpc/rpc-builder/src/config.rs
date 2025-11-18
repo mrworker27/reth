@@ -105,6 +105,7 @@ impl RethRpcServerConfig for RpcServerArgs {
             .proof_permits(self.rpc_proof_permits)
             .pending_block_kind(self.rpc_pending_block)
             .raw_tx_forwarder(self.rpc_forwarder.clone())
+            .onion(self.onion_peers.clone())
     }
 
     fn flashbots_config(&self) -> ValidationApiConfig {

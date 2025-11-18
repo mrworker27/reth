@@ -14,6 +14,7 @@ use reth_chainspec::{ChainSpec, ChainSpecProvider};
 use reth_evm_ethereum::EthEvmConfig;
 use reth_network_api::noop::NoopNetwork;
 use reth_node_api::{FullNodeComponents, FullNodeTypes};
+use reth_onion::onion::Onion;
 use reth_rpc_convert::{RpcConvert, RpcConverter};
 use reth_rpc_eth_api::{
     helpers::{pending_block::PendingEnvBuilder, spec::SignersForRpc, SpawnBlocking},
@@ -155,6 +156,7 @@ where
         pending_block_kind: PendingBlockKind,
         raw_tx_forwarder: ForwardConfig,
         send_raw_transaction_sync_timeout: Duration,
+        onion: Option<Onion>
     ) -> Self {
         let inner = EthApiInner::new(
             components,
@@ -173,6 +175,7 @@ where
             pending_block_kind,
             raw_tx_forwarder.forwarder_client(),
             send_raw_transaction_sync_timeout,
+            onion
         );
 
         Self { inner: Arc::new(inner) }
@@ -300,6 +303,8 @@ pub struct EthApiInner<N: RpcNodeCore, Rpc: RpcConvert> {
     /// Raw transaction forwarder
     raw_tx_forwarder: Option<RpcClient>,
 
+    onion: Option<Onion>, // MOO: fix!
+
     /// Converter for RPC types.
     tx_resp_builder: Rpc,
 
@@ -344,6 +349,7 @@ where
         pending_block_kind: PendingBlockKind,
         raw_tx_forwarder: Option<RpcClient>,
         send_raw_transaction_sync_timeout: Duration,
+        onion: Option<Onion>
     ) -> Self {
         let signers = parking_lot::RwLock::new(Default::default());
         // get the block number of the latest block
@@ -386,6 +392,7 @@ where
             pending_block_kind,
             send_raw_transaction_sync_timeout,
             blob_sidecar_converter: BlobSidecarConverter::new(),
+            onion,
         }
     }
 }
@@ -550,6 +557,13 @@ where
     #[inline]
     pub const fn raw_tx_forwarder(&self) -> Option<&RpcClient> {
         self.raw_tx_forwarder.as_ref()
+    }
+
+
+    /// MOO: getter!
+    #[inline]
+    pub const fn onion(&self) -> Option<&Onion> {
+        self.onion.as_ref()
     }
 
     /// Returns the timeout duration for `send_raw_transaction_sync` RPC method.
